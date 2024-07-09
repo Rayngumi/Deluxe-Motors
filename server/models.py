@@ -3,4 +3,23 @@ from sqlalchemy.ext.associationproxy import association_proxy
 
 from config import db
 
-# Models go here!
+class Owner:
+    pass
+
+
+class Feature:
+    pass
+
+
+class Vehicle:
+    pass
+
+
+class Rental:
+    pass
+
+
+
+
+
+
