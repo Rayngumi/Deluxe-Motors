@@ -16,8 +16,17 @@ class Owner(db.model):
         return f"Owner(id={self.owner_id}, name='{self.owner_name}', age={self.age})"
 
 
-class Feature:
-    pass
+class Feature(db.Model):
+    __tablename__ = 'features'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    car_cc = db.Column(db.Integer, nullable=False)
+    fuel_type = db.Column(db.String, nullable=False)
+    car = db.Column(db.String, nullable=False)
+    
+    def __repr__(self):
+        return f"<Feature(id={self.id}, name={self.name}, car_cc={self.car_cc}, fuel_type={self.fuel_type})>"
 
 
 class Vehicle:
