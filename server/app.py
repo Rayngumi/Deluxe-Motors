@@ -107,8 +107,8 @@ def rentals():
         db.session.commit()
         return jsonify(new_rental.to_dict()), 201  
     
-    # features routes 
-
+    
+# Feature Routes
 def feature_to_dict(feature):
     return {
         'feature_id': feature.feature_id,
