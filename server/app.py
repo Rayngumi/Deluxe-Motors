@@ -153,5 +153,23 @@ def feature(feature_id):
         db.session.commit()
         return jsonify({'message': 'Feature deleted successfully'})
 
+@app.route('/vehicles/<int:vehicle_id>/features', methods=['POST'])
+def add_feature_to_vehicle(vehicle_id):
+    vehicle = Vehicle.query.get(vehicle_id)
+    if not vehicle:
+        return jsonify({'error': 'Vehicle not found'}), 404
+
+    data = request.get_json()
+    if not data or not all(field in data for field in ['feature_id']):
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    feature = Feature.query.get(data['feature_id'])
+    if not feature:
+        return jsonify({'error': 'Feature not found'}), 404
+
+    vehicle.features.append(feature)
+    db.session.commit()
+    return jsonify(feature_to_dict(feature))
+
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
