@@ -32,7 +32,6 @@ def vehicle_to_dict(vehicle):
         'model': vehicle.model,
         'car_image': vehicle.car_image,
         'year': vehicle.year,
-        'color': vehicle.color,
         'price': vehicle.price,
         'description': vehicle.description,
         'owner_id': vehicle.owner_id,
@@ -107,15 +106,15 @@ def vehicles():
         return jsonify([vehicle_to_dict(vehicle) for vehicle in vehicles])
     elif request.method == 'POST':
         data = request.get_json()
-        if not data or not all(field in data for field in ['make', 'model', 'year', 'color', 'price']):
+        if not data or not all(field in data for field in ['make', 'model', 'year', 'price']):
             return jsonify({'error': 'Missing required fields'}), 400
 
         new_vehicle = Vehicle(
+            vehicle_id=data['vehicle_id'],
             make=data['make'],
             model=data['model'],
             car_image=data.get('car_image'),  # Optional field
             year=data['year'],
-            color=data['color'],
             price=data['price'],
             description=data.get('description'),  # Optional field
             owner_id=data.get('owner_id')  # Optional field
@@ -136,7 +135,7 @@ def vehicle(vehicle_id):
             return jsonify({'error': 'Missing data'}), 400
 
         for field, value in data.items():
-            if field in ['make', 'model', 'car_image', 'year', 'color', 'price', 'description', 'owner_id']:
+            if field in ['vehicle_id','make', 'model', 'car_image', 'year', 'price', 'description', 'owner_id']:
                 setattr(vehicle, field, value)
 
         db.session.commit()
