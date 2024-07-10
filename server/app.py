@@ -40,6 +40,7 @@ def vehicle_to_dict(vehicle):
 
 def rental_to_dict(rental):
     return {
+        'customer_name': rental.customer_name,
         'rental_id': rental.rental_id,
         'vehicle_id': rental.vehicle_id,
         'duration_days': rental.duration_days,
@@ -153,7 +154,7 @@ def rentals():
         return jsonify([rental_to_dict(rental) for rental in rentals])
     elif request.method == 'POST':
         data = request.get_json()
-        if not data or not all(field in data for field in ['vehicle_id', 'duration_days', 'price']):
+        if not data or not all(field in data for field in ['customer_name','vehicle_id', 'duration_days', 'price']):
             return jsonify({'error': 'Missing required fields'}), 400
 
         vehicle = Vehicle.query.get(data['vehicle_id'])
@@ -161,6 +162,7 @@ def rentals():
             return jsonify({'error': 'Vehicle not found'}), 404
 
         new_rental = Rental(
+            customer_name=data['customer_name'],
             vehicle_id=data['vehicle_id'],
             duration_days=data['duration_days'],
             price=data['price']
