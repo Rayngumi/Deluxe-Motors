@@ -106,7 +106,63 @@ def rentals():
         db.session.add(new_rental)
         db.session.commit()
         return jsonify(new_rental.to_dict()), 201  
+    
+    # features routes 
 
+def feature_to_dict(feature):
+    return {
+        'feature_id': feature.feature_id,
+        'name': feature.name,
+        'car_cc': feature.car_cc,
+        'fuel_type': feature.fuel_type,
+        'car': feature.car
+    }
+
+@app.route('/features', methods=['GET', 'POST'])
+def features():
+    if request.method == 'GET':
+        features = Feature.query.all()
+        return jsonify([feature_to_dict(feature) for feature in features])
+    elif request.method == 'POST':
+        data = request.get_json()
+        if not data or not all(field in data for field in ['name', 'car_cc', 'fuel_type', 'car']):
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        new_feature = Feature(
+            name=data['name'],
+            car_cc=data['car_cc'],
+            fuel_type=data['fuel_type'],
+            car=data['car']
+        )
+        db.session.add(new_feature)
+        db.session.commit()
+        return jsonify(feature_to_dict(new_feature)), 201
+
+@app.route('/features/<int:feature_id>', methods=['PATCH', 'DELETE'])
+def feature(feature_id):
+    if request.method == 'PATCH':
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'Missing data'}), 400
+
+        feature = Feature.query.get(feature_id)
+        if not feature:
+            return jsonify({'error': 'Feature not found'}), 404
+
+        for field, value in data.items():
+            setattr(feature, field, value)
+
+        db.session.commit()
+        return jsonify(feature_to_dict(feature))
+
+    elif request.method == 'DELETE':
+        feature = Feature.query.get(feature_id)
+        if not feature:
+            return jsonify({'error': 'Feature not found'}), 404
+
+        db.session.delete(feature)
+        db.session.commit()
+        return jsonify({'message': 'Feature deleted successfully'})
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
