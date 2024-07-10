@@ -13,7 +13,7 @@ class Owner(db.Model):
     address = db.Column(db.String, nullable=False)
 
     # Relationship with Vehicle (one-to-many)
-    vehicles = db.relationship("Vehicle", backref='owner', lazy='dynamic') 
+    vehicles = db.relationship("Vehicle", backref='owners') 
 
     def __repr__(self):
         return f"Owner(id={self.owner_id}, name='{self.owner_name}', age={self.age})"
