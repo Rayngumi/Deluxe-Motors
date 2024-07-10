@@ -5,19 +5,13 @@
 # Remote library imports
 from flask import Flask, request, jsonify
 from flask_restful import Resource
-from flask_sqlalchemy import SQLAlchemy
+
 
 # Local imports
 from config import app, db, api
 from models import Owner,Vehicle,Rental,Feature
 # Add your model imports
-app = Flask(__name__)
 
-# Configure database (assuming you have a database connection setup)
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db' 
-
-db = SQLAlchemy(app)
 
 
 # Views go here!
@@ -54,7 +48,7 @@ def owners():
         )
         db.session.add(new_owner)
         db.session.commit()
-        return jsonify(owner_to_dict(new_owner)), 201  
+        return jsonify(owner_to_dict(new_owner)), 201  #created
 
 @app.route('/owners/<int:owner_id>', methods=['PATCH', 'DELETE'])
 def owner(owner_id):
