@@ -37,7 +37,7 @@ def vehicle_to_dict(vehicle):
         'price': vehicle.price,
         'description': vehicle.description,
         'owner_id': vehicle.owner_id,
-        'features': [feature.feature_id for feature in vehicle.features]
+        # 'features': feature_to_dict(vehicle.features) if vehicle.features else None
     }
 
 def rental_to_dict(rental):
@@ -56,7 +56,8 @@ def feature_to_dict(feature):
         'speed_km': feature.speed_km,
         'car_cc': feature.car_cc,
         'fuel_type': feature.fuel_type,
-        'color': feature.color
+        'vehicle_id':feature.vehicle_id,
+        'vehicles': vehicle_to_dict(feature.vehicles) if feature.vehicles else None
     }
 
 @app.route('/owners', methods=['GET', 'POST'])
@@ -79,11 +80,14 @@ def owners():
         db.session.commit()
         return jsonify(owner_to_dict(new_owner)), 201
 
-@app.route('/owners/<int:owner_id>', methods=['PATCH', 'DELETE'])
+@app.route('/owners/<int:owner_id>', methods=['GET', 'PATCH', 'DELETE'])
 def owner(owner_id):
     owner = Owner.query.get(owner_id)
     if not owner:
         return jsonify({'error': 'Owner not found'}), 404
+
+    if request.method == 'GET':
+        return jsonify(owner_to_dict(owner))
 
     if request.method == 'PATCH':
         data = request.get_json()
@@ -126,11 +130,14 @@ def vehicles():
         db.session.commit()
         return jsonify(vehicle_to_dict(new_vehicle)), 201
 
-@app.route('/vehicles/<int:vehicle_id>', methods=['PATCH', 'DELETE'])
+@app.route('/vehicles/<int:vehicle_id>', methods=['GET', 'PATCH', 'DELETE'])
 def vehicle(vehicle_id):
     vehicle = Vehicle.query.get(vehicle_id)
     if not vehicle:
         return jsonify({'error': 'Vehicle not found'}), 404
+
+    if request.method == 'GET':
+        return jsonify(vehicle_to_dict(vehicle))
 
     if request.method == 'PATCH':
         data = request.get_json()
@@ -173,31 +180,14 @@ def rentals():
         db.session.commit()
         return jsonify(rental_to_dict(new_rental)), 201
 
-@app.route('/features', methods=['GET', 'POST'])
-def features():
+@app.route('/rentals/<int:rental_id>', methods=['GET', 'PATCH', 'DELETE'])
+def rental(rental_id):
+    rental = Rental.query.get(rental_id)
+    if not rental:
+        return jsonify({'error': 'Rental not found'}), 404
+
     if request.method == 'GET':
-        features = Feature.query.all()
-        return jsonify([feature_to_dict(feature) for feature in features])
-    elif request.method == 'POST':
-        data = request.get_json()
-        if not data or not all(field in data for field in ['speed_km', 'car_cc', 'fuel_type', 'color']):
-            return jsonify({'error': 'Missing required fields'}), 400
-
-        new_feature = Feature(
-            speed_km=data['speed_km'],
-            car_cc=data['car_cc'],
-            fuel_type=data['fuel_type'],
-            color=data['color']
-        )
-        db.session.add(new_feature)
-        db.session.commit()
-        return jsonify(feature_to_dict(new_feature)), 201
-
-@app.route('/features/<int:feature_id>', methods=['PATCH', 'DELETE'])
-def feature(feature_id):
-    feature = Feature.query.get(feature_id)
-    if not feature:
-        return jsonify({'error': 'Feature not found'}), 404
+        return jsonify(rental_to_dict(rental))
 
     if request.method == 'PATCH':
         data = request.get_json()
@@ -205,7 +195,58 @@ def feature(feature_id):
             return jsonify({'error': 'Missing data'}), 400
 
         for field, value in data.items():
-            if field in ['speed_km', 'car_cc', 'fuel_type', 'color']:
+            if field in ['customer_name', 'vehicle_id', 'duration_days', 'price']:
+                setattr(rental, field, value)
+
+        db.session.commit()
+        return jsonify(rental_to_dict(rental))
+
+    elif request.method == 'DELETE':
+        db.session.delete(rental)
+        db.session.commit()
+        return jsonify({'message': 'Rental deleted successfully'})
+
+@app.route('/features', methods=['GET', 'POST'])
+def features():
+    if request.method == 'GET':
+        features = Feature.query.all()
+        return jsonify([feature_to_dict(feature) for feature in features])
+    elif request.method == 'POST':
+        data = request.get_json()
+        if not data or not all(field in data for field in ['feature_id','speed_km', 'car_cc', 'fuel_type', 'vehicle_id']):
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        vehicles = Vehicle.query.get(data['vehicle_id'])
+        if not vehicles:
+            return jsonify({'error': 'Vehicle not found'}), 404
+    
+        new_feature = Feature(
+            feature_id=data['feature_id'],
+            speed_km=data['speed_km'],
+            car_cc=data['car_cc'],
+            fuel_type=data['fuel_type'],
+            vehicle_id=data['vehicle_id']
+        )
+        db.session.add(new_feature)
+        db.session.commit()
+        return jsonify(feature_to_dict(new_feature)), 201
+
+@app.route('/features/<int:feature_id>', methods=['GET', 'PATCH', 'DELETE'])
+def feature(feature_id):
+    feature = Feature.query.get(feature_id)
+    if not feature:
+        return jsonify({'error': 'Feature not found'}), 404
+
+    if request.method == 'GET':
+        return jsonify(feature_to_dict(feature))
+
+    if request.method == 'PATCH':
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'Missing data'}), 400
+
+        for field, value in data.items():
+            if field in ['feature_id','speed_km', 'car_cc', 'fuel_type', 'vehicle_id']:
                 setattr(feature, field, value)
 
         db.session.commit()
