@@ -54,7 +54,6 @@ def feature_to_dict(feature):
         'speed_km': feature.speed_km,
         'car_cc': feature.car_cc,
         'fuel_type': feature.fuel_type,
-        'color': feature.color,
         'vehicle_id':feature.vehicle_id,
         'vehicles': vehicle_to_dict(feature.vehicles) if feature.vehicles else None
     }
@@ -212,7 +211,7 @@ def features():
         return jsonify([feature_to_dict(feature) for feature in features])
     elif request.method == 'POST':
         data = request.get_json()
-        if not data or not all(field in data for field in ['feature_id','speed_km', 'car_cc', 'fuel_type', 'color', 'vehicle_id']):
+        if not data or not all(field in data for field in ['feature_id','speed_km', 'car_cc', 'fuel_type', 'vehicle_id']):
             return jsonify({'error': 'Missing required fields'}), 400
 
         vehicles = Vehicle.query.get(data['vehicle_id'])
@@ -224,7 +223,6 @@ def features():
             speed_km=data['speed_km'],
             car_cc=data['car_cc'],
             fuel_type=data['fuel_type'],
-            color=data['color'],
             vehicle_id=data['vehicle_id']
         )
         db.session.add(new_feature)
@@ -246,7 +244,7 @@ def feature(feature_id):
             return jsonify({'error': 'Missing data'}), 400
 
         for field, value in data.items():
-            if field in ['feature_id','speed_km', 'car_cc', 'fuel_type', 'color', 'vehicle_id']:
+            if field in ['feature_id','speed_km', 'car_cc', 'fuel_type', 'vehicle_id']:
                 setattr(feature, field, value)
 
         db.session.commit()

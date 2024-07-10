@@ -24,9 +24,8 @@ class Feature(db.Model):
 
     feature_id = db.Column(db.Integer, primary_key=True, autoincrement = True)
     speed_km = db.Column(db.String, nullable=False)
-    car_cc = db.Column(db.Integer, nullable=False)
+    car_cc = db.Column(db.Integer, nullable=True)
     fuel_type = db.Column(db.String, nullable=False)
-    color = db.Column(db.String, nullable=False)
     
     # Relationship with Vehicle (many-to-many)
     vehicle_id = db.Column(db.Integer, db.ForeignKey('vehicles.vehicle_id'))
