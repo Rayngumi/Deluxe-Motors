@@ -103,10 +103,10 @@ def rentals():
 def feature_to_dict(feature):
     return {
         'feature_id': feature.feature_id,
-        'name': feature.name,
+        'speed_km': feature.speed_km,
         'car_cc': feature.car_cc,
         'fuel_type': feature.fuel_type,
-        'car': feature.car
+        'color': feature.color
     }
 
 @app.route('/features', methods=['GET', 'POST'])
@@ -116,14 +116,15 @@ def features():
         return jsonify([feature_to_dict(feature) for feature in features])
     elif request.method == 'POST':
         data = request.get_json()
-        if not data or not all(field in data for field in ['name', 'car_cc', 'fuel_type', 'car']):
+        if not data or not all(field in data for field in ['feature_id', 'speed_km', 'car_cc', 'fuel_type', 'color']):
             return jsonify({'error': 'Missing required fields'}), 400
 
         new_feature = Feature(
-            name=data['name'],
+            feature_id=data['feature_id'],
+            speed_km=data['speed_km'],
             car_cc=data['car_cc'],
             fuel_type=data['fuel_type'],
-            car=data['car']
+            color=data['color']
         )
         db.session.add(new_feature)
         db.session.commit()
@@ -141,7 +142,7 @@ def feature(feature_id):
             return jsonify({'error': 'Missing data'}), 400
 
         for field, value in data.items():
-            if field in ['name', 'car_cc', 'fuel_type', 'car']:
+            if field in ['speed_km', 'car_cc', 'fuel_type', 'color']:
                 setattr(feature, field, value)
 
         db.session.commit()

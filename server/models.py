@@ -22,17 +22,17 @@ class Owner(db.Model):
 class Feature(db.Model):
     __tablename__ = 'features'
 
-    feature_id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
+    feature_id = db.Column(db.Integer, primary_key=True, autoincrement = True)
+    speed_km = db.Column(db.String, nullable=False)
     car_cc = db.Column(db.Integer, nullable=False)
     fuel_type = db.Column(db.String, nullable=False)
-    car = db.Column(db.String, nullable=False)
+    color = db.Column(db.String, nullable=False)
     
     # Relationship with Vehicle (many-to-many)
     vehicles = db.relationship("Vehicle", secondary="vehicle_features", back_populates="features")
 
     def __repr__(self):
-        return f"<Feature(id={self.feature_id}, name={self.name}, car_cc={self.car_cc}, fuel_type={self.fuel_type})>"
+        return f"<Feature(feature_id={self.feature_id}, speed_km={self.speed_km}, car_cc={self.car_cc}, fuel_type={self.fuel_type})>"
 
 
 class Vehicle(db.Model):
@@ -43,7 +43,6 @@ class Vehicle(db.Model):
     model = db.Column(db.String(128), nullable=False)
     car_image = db.Column(db.String(128), nullable=True)
     year = db.Column(db.Integer, nullable=False)
-    color = db.Column(db.String(128), nullable=False)
     price = db.Column(db.Float, nullable=False)
     description = db.Column(db.String(1024), nullable=True)
 
