@@ -1,6 +1,7 @@
 from sqlalchemy_serializer import SerializerMixin 
 # from sqlalchemy.ext.associationproxy import association_proxy (if you're using it)
-
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 from config import db
 
 class Owner(db.Model):
@@ -80,19 +81,20 @@ class VehicleFeatures(db.Model):
     vehicle_id = db.Column(db.Integer, db.ForeignKey('vehicles.vehicle_id'), primary_key=True)
     feature_id = db.Column(db.Integer, db.ForeignKey('features.feature_id'), primary_key=True)
 
+
     def __repr__(self):
         return f"<VehicleFeatures(vehicle_id={self.vehicle_id}, feature_id={self.feature_id})>"
 
+      
+class User(UserMixin, db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(150), nullable=False, unique=True)
+    email = db.Column(db.String(150), nullable=False, unique=True)
+    password_hash = db.Column(db.String(128), nullable=False)
 
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
 
-
-
-
-
-
-
-
-
-
-
-
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
