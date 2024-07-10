@@ -43,7 +43,7 @@ class Vehicle(db.Model):
     model = db.Column(db.String(128), nullable=False)
     car_image = db.Column(db.String(128), nullable=True)
     year = db.Column(db.Integer, nullable=False)
-    price = db.Column(db.Float, nullable=False)
+    price = db.Column(db.String, nullable=False)
     description = db.Column(db.String(1024), nullable=True)
 
     # Relationship with Owner (one-to-many)
