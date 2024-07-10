@@ -60,16 +60,17 @@ class Vehicle(db.Model):
 class Rental(db.Model):
     __tablename__ = 'rentals'
 
+    customer_name = db.Column(db.String, nullable=False)
     rental_id = db.Column(db.Integer, primary_key=True)
     vehicle_id = db.Column(db.Integer, db.ForeignKey('vehicles.vehicle_id')) 
     duration_days = db.Column(db.Integer, nullable=False)
-    price = db.Column(db.Float, nullable=False)  
+    price = db.Column(db.String, nullable=False)  
     
     # Relationship with Vehicle (one-to-one)
     vehicle = db.relationship("Vehicle", backref=db.backref('rental', uselist=False))
 
     def __repr__(self):
-        return f"Rental ID: {self.rental_id} - Vehicle: {self.vehicle_id} - Duration: {self.duration_days} days"
+        return f"Customer Name: {self.customer_name} - Rental ID: {self.rental_id} - Vehicle: {self.vehicle_id} - Duration: {self.duration_days} days"
 
 
 # Association table (many-to-many relationship between Vehicle and Feature)
