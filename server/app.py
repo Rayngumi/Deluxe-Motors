@@ -1,16 +1,18 @@
-#!/usr/bin/env python3
 
-# Standard library imports
-
-# Remote library imports
 from flask import Flask, request, jsonify
 from flask_restful import Resource
-
-# Local imports
+from flask_login import LoginManager
+from auth import auth, login_manager
 from config import app, db, api
 from models import Owner, Vehicle, Rental, Feature, VehicleFeatures
 
-# Views go here!
+app.config['SECRET_KEY'] = 'your_secret_key'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+db.init_app(app)
+login_manager.init_app(app)
+login_manager.login_view = 'auth.login'
+
+app.register_blueprint(auth, url_prefix='/auth')
 
 @app.route('/')
 def index():
