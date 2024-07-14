@@ -4,7 +4,7 @@ from flask_restful import Resource
 from flask_login import LoginManager 
 from auth import auth, login_manager
 from config import app, db, api
-from models import Owner, Vehicle, Rental, Feature, VehicleFeatures
+from models import Owner, Vehicle, Rental, Feature, VehicleFeatures, Likes
 
 app.config['SECRET_KEY'] = 'your_secret_key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
@@ -255,6 +255,41 @@ def feature(feature_id):
         db.session.delete(feature)
         db.session.commit()
         return jsonify({'message': 'Feature deleted successfully'})
+
+
+
+@app.route('/update-likes', methods=['POST'])
+def update_likes():
+  # Extract data from request body
+  data = request.json
+  vehicle_id = data.get('vehicleId')
+  like_count = data.get('likeCount')
+  dislike_count = data.get('dislikeCount')
+  reaction = data.get('reaction')
+
+  
+  if not all([vehicle_id, like_count, dislike_count, reaction]):
+    return jsonify({'error': 'Missing required data'}), 400  
+
+
+  like_record = Likes.query.get(vehicle_id)
+
+  if not like_record:
+    like_record = Likes(vehicle_id=vehicle_id, like_count=like_count, dislike_count=dislike_count)
+    db.session.add(like_record)
+  else:
+   
+    if reaction == 'like':
+      like_record.like_count += 1
+      like_record.dislike_count -= 1 if like_record.dislike_count > 0 else 0
+    else:
+      like_record.dislike_count += 1
+      like_record.like_count -= 1 if like_record.like_count > 0 else 0
+
+  db.session.commit()
+
+  return jsonify({'message': 'Reaction updated successfully'}), 200
+
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
