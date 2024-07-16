@@ -100,13 +100,3 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
     
 
-class Likes(db.Model):
-  __tablename__ = 'likes_table'
-
-  id = db.Column(db.Integer, primary_key=True)
-  vehicle_id = db.Column(db.Integer, unique=True, nullable=False)
-  like_count = db.Column(db.Integer, default=0)
-  dislike_count = db.Column(db.Integer, default=0)
-
-  def __repr__(self):
-    return f'<Likes(vehicle_id={self.vehicle_id}, like_count={self.like_count}, dislike_count={self.dislike_count})>'
