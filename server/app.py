@@ -262,16 +262,42 @@ def feature(feature_id):
         return jsonify({'message': 'Feature deleted successfully'})
 
 
+
+@app.route('/api/likes/<int:vehicle_id>', methods=['GET'])
+def get_reactions(vehicle_id):
+    vehicle = Vehicle.query.get(vehicle_id)
+    if vehicle:
+        return jsonify({
+            'likes': vehicle.likes if vehicle.likes is not None else 0,
+            'dislikes': vehicle.dislikes if vehicle.dislikes is not None else 0
+        })
+    return jsonify({'error': 'Vehicle not found'}), 404
+
 @app.route('/api/likes', methods=['POST'])
-def update_likes():
+def update_reactions():
     data = request.get_json()
     vehicle_id = data.get('vehicleId')
-    like_count = data.get('likeCount')
-    dislike_count = data.get('dislikeCount')
     reaction = data.get('reaction')
-    
-    
-    return jsonify({'message': 'Likes updated successfully'})
+
+    vehicle = Vehicle.query.get(vehicle_id)
+    if vehicle:
+        if vehicle.likes is None:
+            vehicle.likes = 0
+        if vehicle.dislikes is None:
+            vehicle.dislikes = 0
+        
+        if reaction == 'like':
+            vehicle.likes += 1
+            if data.get('dislike'):
+                vehicle.dislikes -= 1
+        elif reaction == 'dislike':
+            vehicle.dislikes += 1
+            if data.get('like'):
+                vehicle.likes -= 1
+        db.session.commit()
+        return jsonify({'message': 'Reaction updated successfully'})
+    return jsonify({'error': 'Vehicle not found'}), 404
+
 
 
 @app.route('/api/login', methods=['POST', 'OPTIONS'])

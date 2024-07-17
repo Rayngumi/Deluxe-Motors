@@ -46,6 +46,8 @@ class Vehicle(db.Model):
     year = db.Column(db.Integer, nullable=False)
     price = db.Column(db.String, nullable=False)
     description = db.Column(db.String(1024), nullable=True)
+    likes = db.Column(db.Integer, default=0)
+    dislikes = db.Column(db.Integer, default=0)
 
     # Relationship with Owner (one-to-many)
     owner_id = db.Column(db.Integer, db.ForeignKey('owners.owner_id'))
