@@ -1,15 +1,20 @@
-
 from flask import Flask, request, jsonify
 from flask_restful import Resource
-from flask_login import LoginManager 
-from auth import auth, login_manager
-from config import app, db, api
-from models import Owner, Vehicle, Rental, Feature, VehicleFeatures, Likes
+from flask_login import LoginManager
+from auth import auth, login_manager  
+from config import app, db, api  
+from models import Owner, Vehicle, Rental, Feature  
+
 
 app.config['SECRET_KEY'] = 'your_secret_key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+
+
 login_manager.init_app(app)
 login_manager.login_view = 'auth.login'
+
+
+
 
 app.register_blueprint(auth, url_prefix='/auth')
 
@@ -257,39 +262,62 @@ def feature(feature_id):
         return jsonify({'message': 'Feature deleted successfully'})
 
 
-
-@app.route('/update-likes', methods=['POST'])
+@app.route('/api/likes', methods=['POST'])
 def update_likes():
-  # Extract data from request body
-  data = request.json
-  vehicle_id = data.get('vehicleId')
-  like_count = data.get('likeCount')
-  dislike_count = data.get('dislikeCount')
-  reaction = data.get('reaction')
-
-  
-  if not all([vehicle_id, like_count, dislike_count, reaction]):
-    return jsonify({'error': 'Missing required data'}), 400  
+    data = request.get_json()
+    vehicle_id = data.get('vehicleId')
+    like_count = data.get('likeCount')
+    dislike_count = data.get('dislikeCount')
+    reaction = data.get('reaction')
+    
+    
+    return jsonify({'message': 'Likes updated successfully'})
 
 
-  like_record = Likes.query.get(vehicle_id)
+@app.route('/api/login', methods=['POST', 'OPTIONS'])
+def login():
+    if request.method == 'OPTIONS':
+        headers = {
+            'Access-Control-Allow-Origin': '*',  
+            'Access-Control-Allow-Methods': 'POST',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        }
+        return ('', 204, headers)
 
-  if not like_record:
-    like_record = Likes(vehicle_id=vehicle_id, like_count=like_count, dislike_count=dislike_count)
-    db.session.add(like_record)
-  else:
-   
-    if reaction == 'like':
-      like_record.like_count += 1
-      like_record.dislike_count -= 1 if like_record.dislike_count > 0 else 0
+    
+    data = request.json  
+    username = data.get('username')
+    password = data.get('password')
+
+    if username == 'testuser' and password == 'testpassword':
+        return jsonify({'message': 'Login successful'}), 200
     else:
-      like_record.dislike_count += 1
-      like_record.like_count -= 1 if like_record.like_count > 0 else 0
+        return jsonify({'error': 'Invalid credentials'}), 401
+    
 
-  db.session.commit()
+@app.route('/api/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    owner_name = data.get('owner_name')
+    contact_info = data.get('contact_info')
+    age = data.get('age')
+    address = data.get('address')
 
-  return jsonify({'message': 'Reaction updated successfully'}), 200
+    
+    if not all([owner_name, contact_info, age, address]):
+        return jsonify({'error': 'Missing required fields'}), 400
 
+   
+    new_owner = Owner(
+        owner_name=owner_name,
+        contact_info=contact_info,
+        age=age,
+        address=address
+    )
+    db.session.add(new_owner)
+    db.session.commit()
+
+    return jsonify({'message': 'Registration successful', 'owner_id': new_owner.owner_id}), 201
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
