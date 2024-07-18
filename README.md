@@ -18,7 +18,7 @@ https://github.com/Rayngumi/Deluxe-motors.git
 2. Install the dependencies:
 
 ```
-pip install -r requirements.txt
+pip install Pipfile
 ```
 
 3. Set up the database:
